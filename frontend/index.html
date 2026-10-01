@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Classroom Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Smart Classroom Monitor</h1>
+      <p class="subtitle">IoT-Enabled Real-Time Occupancy and Noise Detection</p>
+    </div>
+    <div id="connPill" class="pill off">ESP32 DISCONNECTED</div>
+  </header>
+
+  <section class="infobar">
+    <div><span class="label">Current time</span><strong id="clock">--:--:--</strong></div>
+    <div><span class="label">Last data update</span><strong id="lastUpdate">Never</strong></div>
+    <div><span class="label">ESP32 status</span><strong id="infoConn">DISCONNECTED</strong></div>
+  </section>
+
+  <div id="notice" class="notice hidden"></div>
+
+  <main class="grid">
+    <article class="card" id="cardOcc">
+      <h2>Occupancy</h2>
+      <div class="value"><span id="occValue">--</span><small id="occLimit"></small></div>
+      <div class="status" id="occStatus">No data</div>
+    </article>
+
+    <article class="card" id="cardNoise">
+      <h2>Noise Level</h2>
+      <div class="value"><span id="noiseValue">--</span><small>dB</small></div>
+      <div class="bar"><div id="noiseBar" class="bar-fill"></div></div>
+      <div class="status" id="noiseStatus">No data</div>
+    </article>
+
+    <article class="card" id="cardRadar">
+      <h2>Radar / Presence</h2>
+      <div class="value"><span id="radarValue">--</span></div>
+      <div class="status" id="radarStatus">No data</div>
+    </article>
+
+    <article class="card" id="cardCam">
+      <h2>Camera</h2>
+      <div class="value"><span id="camValue">--</span></div>
+      <div class="status" id="camStatus">No data</div>
+    </article>
+
+    <article class="card" id="cardEsp">
+      <h2>ESP32 Connection</h2>
+      <div class="value"><span id="espValue">--</span></div>
+      <div class="status" id="espStatus">Waiting...</div>
+    </article>
+  </main>
+
+  <section class="panel">
+    <h2>Alerts</h2>
+    <div id="alerts"><div class="alert ok">No active alerts</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Noise history (from database)</h2>
+    <canvas id="noiseChart"></canvas>
+    <div class="muted small">Dashed red line = high-noise threshold</div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Live camera</h2>
+      <span id="streamStatus" class="muted small">Stream not configured</span>
+    </div>
+    <div class="stream-frame">
+      <img id="liveStream" class="hidden" alt="Live classroom camera stream" />
+      <div id="streamEmpty" class="stream-empty">Configure a camera MJPEG stream URL to view live video.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <h2>Camera photo archive</h2>
+      <span id="photoCount" class="muted small">Loading photos...</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Captured</th><th>Photo</th><th>Image</th></tr></thead>
+        <tbody id="photoRows"><tr><td colspan="3" class="muted">Waiting for photos</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Event log</h2>
+    <ul id="log" class="log"><li class="muted">No events yet</li></ul>
+  </section>
+
+  <footer class="footer">ESP32 &rarr; Render API &rarr; MongoDB &rarr; this dashboard (updates every second)</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
