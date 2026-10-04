@@ -8,7 +8,7 @@ const POLL_INTERVAL_MS    = 1000;   // ask the backend every 1 second
 const HISTORY_INTERVAL_MS = 5000;   // refresh the noise chart every 5 seconds
 const PHOTO_INTERVAL_MS   = 60000;  // refresh the photo archive every minute
 const REQUEST_TIMEOUT_MS  = 8000;   // Render can be slow when waking up
-const NOISE_ALERT_DB      = 70;     // HIGH NOISE alert above this
+const NOISE_ALERT_LEVEL   = 1200;   // Raw INMP441 amplitude; tune to your microphone and room
 const OCCUPANCY_LIMIT     = 30;     // OCCUPANCY alert above this (set your classroom capacity)
 // =====================================================
 
@@ -87,12 +87,12 @@ function render(d) {
 
   // Noise
   $("noiseValue").textContent = noise.toFixed(1);
-  const pct = Math.max(0, Math.min(100, ((noise - 30) / 70) * 100));
-  const loud = noise > NOISE_ALERT_DB;
-  const rising = noise > NOISE_ALERT_DB - 10;
+  const pct = Math.max(0, Math.min(100, (noise / (NOISE_ALERT_LEVEL * 2)) * 100));
+  const loud = noise > NOISE_ALERT_LEVEL;
+  const rising = noise > NOISE_ALERT_LEVEL * 0.8;
   $("noiseBar").style.width = pct + "%";
   $("noiseBar").style.background = loud ? "var(--danger)" : (rising ? "var(--warn)" : "var(--ok)");
-  $("noiseStatus").textContent = loud ? "Too loud" : (rising ? "Getting loud" : "Normal");
+  $("noiseStatus").textContent = loud ? "Above threshold" : (rising ? "Approaching threshold" : "Normal");
   setCard("cardNoise", loud ? "danger" : (rising ? "warn" : "ok"));
 
   // Radar
@@ -102,12 +102,12 @@ function render(d) {
 
   // Camera
   $("camValue").textContent = cam ? "ONLINE" : "NO DATA";
-  $("camStatus").textContent = cam ? "Sending counts" : "No recent count received";
+  $("camStatus").textContent = cam ? "Recent camera activity" : "No recent photo or count";
   setCard("cardCam", cam ? "ok" : "warn");
 
   // Alerts
   const alerts = [];
-  if (loud) alerts.push({ text: "HIGH NOISE DETECTED", level: "danger" });
+  if (loud) alerts.push({ text: "HIGH MICROPHONE LEVEL", level: "danger" });
   if (occ !== null && ((radar && occ === 0) || (!radar && occ > 0))) {
     alerts.push({ text: "ABNORMAL PRESENCE/MOVEMENT (camera and radar disagree)", level: "warn" });
   }
@@ -183,12 +183,12 @@ function drawChart(points) {
     ctx.fillText("Not enough history yet", 10, 24);
     return;
   }
-  const minDb = 30, maxDb = 100;
-  const y = (v) => h - 8 - ((Math.min(Math.max(v, minDb), maxDb) - minDb) / (maxDb - minDb)) * (h - 16);
+  const minLevel = 0, maxLevel = NOISE_ALERT_LEVEL * 2;
+  const y = (v) => h - 8 - ((Math.min(Math.max(v, minLevel), maxLevel) - minLevel) / (maxLevel - minLevel)) * (h - 16);
   const x = (i) => 8 + (i / (points.length - 1)) * (w - 16);
 
   ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 1; ctx.setLineDash([6, 4]);
-  ctx.beginPath(); ctx.moveTo(0, y(NOISE_ALERT_DB)); ctx.lineTo(w, y(NOISE_ALERT_DB)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, y(NOISE_ALERT_LEVEL)); ctx.lineTo(w, y(NOISE_ALERT_LEVEL)); ctx.stroke();
   ctx.setLineDash([]);
 
   ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2; ctx.beginPath();

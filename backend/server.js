@@ -11,6 +11,7 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 
 const ESP32_ONLINE_MS = 10000;          // ESP32 counts as online if it sent data in the last 10 s
 const CAMERA_ONLINE_MS = 15000;         // camera counts as online if a count arrived in the last 15 s
+const CAMERA_PHOTO_ONLINE_MS = 35 * 60 * 1000; // photo camera is expected every 30 minutes
 const KEEP_SECONDS = 60 * 60 * 24 * 7;  // MongoDB deletes readings older than 7 days automatically
 
 if (!MONGODB_URI || !API_KEY) {
@@ -136,13 +137,15 @@ app.get("/api/photos/:id/image", async (req, res) => {
 // Dashboard reads the newest values here
 app.get("/api/latest", async (req, res) => {
   try {
-    const [reading, occ] = await Promise.all([
+    const [reading, occ, photo] = await Promise.all([
       Reading.findOne().sort({ createdAt: -1 }).lean(),
       Occupancy.findOne().sort({ createdAt: -1 }).lean(),
+      Photo.findOne().sort({ createdAt: -1 }).select("createdAt").lean(),
     ]);
     const now = Date.now();
     const espOnline = !!reading && now - reading.createdAt.getTime() < ESP32_ONLINE_MS;
     const camOnline = !!occ && now - occ.createdAt.getTime() < CAMERA_ONLINE_MS;
+    const photoOnline = !!photo && now - photo.createdAt.getTime() < CAMERA_PHOTO_ONLINE_MS;
 
     res.set("Cache-Control", "no-store");
     res.json({
@@ -150,7 +153,7 @@ app.get("/api/latest", async (req, res) => {
       lastUpdate: reading ? reading.createdAt : null,
       noise: reading ? reading.noise : null,
       radar: reading ? reading.radar : null,
-      camera: camOnline ? 1 : 0,
+      camera: camOnline || photoOnline ? 1 : 0,
       occupancy: camOnline ? occ.count : null,
     });
   } catch (err) {
