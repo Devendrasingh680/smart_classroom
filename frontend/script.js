@@ -1,7 +1,7 @@
 // =====================================================
 // CONFIGURATION: change ONLY the URL below to your Render backend URL
 // =====================================================
-const API_BASE = "https://YOUR-BACKEND-NAME.onrender.com";
+const API_BASE = "https://smart-classroom-87fd.onrender.com";
 const CAMERA_STREAM_URL = ""; // HTTPS MJPEG stream URL provided by your camera/streaming service
 
 const POLL_INTERVAL_MS    = 1000;   // ask the backend every 1 second
