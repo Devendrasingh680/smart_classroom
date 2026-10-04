@@ -11,7 +11,7 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 
 const ESP32_ONLINE_MS = 10000;          // ESP32 counts as online if it sent data in the last 10 s
 const CAMERA_ONLINE_MS = 15000;         // camera counts as online if a count arrived in the last 15 s
-const CAMERA_PHOTO_ONLINE_MS = 35 * 60 * 1000; // photo camera is expected every 30 minutes
+const CAMERA_PHOTO_ONLINE_MS = 10 * 60 * 1000; // photo camera is expected every 5 minutes
 const KEEP_SECONDS = 60 * 60 * 24 * 7;  // MongoDB deletes readings older than 7 days automatically
 
 if (!MONGODB_URI || !API_KEY) {
@@ -123,7 +123,7 @@ app.get("/api/photos", async (req, res) => {
 app.get("/api/photos/:id/image", async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).end();
   try {
-    const photo = await Photo.findById(req.params.id).select("image contentType").lean();
+    const photo = await Photo.findById(req.params.id).select("image contentType");
     if (!photo) return res.status(404).end();
     res.set("Content-Type", photo.contentType);
     res.set("Cache-Control", "public, max-age=3600");
