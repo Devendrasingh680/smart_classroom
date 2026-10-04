@@ -9,7 +9,7 @@ const HISTORY_INTERVAL_MS = 5000;   // refresh the noise chart every 5 seconds
 const PHOTO_INTERVAL_MS   = 60000;  // refresh the photo archive every minute
 const REQUEST_TIMEOUT_MS  = 8000;   // Render can be slow when waking up
 const NOISE_ALERT_LEVEL   = 1200;   // Raw INMP441 amplitude; tune to your microphone and room
-const OCCUPANCY_LIMIT     = 30;     // OCCUPANCY alert above this (set your classroom capacity)
+const OCCUPANCY_LIMIT     = 65;     // OCCUPANCY alert above this (set your classroom capacity)
 // =====================================================
 
 const BASE = API_BASE.replace(/\/+$/, "");
